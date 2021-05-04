@@ -4,7 +4,7 @@ from libreco.data import random_split, DatasetPure
 from libreco.algorithms import SVDpp  # pure data, algorithm SVD++
 from libreco.evaluation import evaluate
 
-data = pd.read_csv("u.data", sep=" ",
+data = pd.read_csv("u.data", sep="::",
                    names=["user", "item", "label", "time"])
 
 # split whole data into three folds for training, evaluating and testing
@@ -21,8 +21,7 @@ svdpp = SVDpp(task="rating", data_info=data_info, embed_size=16, n_epochs=3, lr=
 svdpp.fit(train_data, verbose=2, eval_data=eval_data, metrics=["rmse", "mae", "r2"])
 
 # do final evaluation on test data
-print("evaluate_result: ", evaluate(model=svdpp, data=test_data,
-                                    metrics=["rmse", "mae"]))
+print("evaluate_result: ", evaluate(model=svdpp, data=test_data, metrics=["rmse", "mae"]))
 # predict preference of user 2211 to item 110
 print("prediction: ", svdpp.predict(user=2211, item=110))
 # recommend 7 items for user 2211
