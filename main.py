@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 from libreco.data import random_split, DatasetPure
 from libreco.algorithms import SVDpp  # pure data, algorithm SVD++
+from libreco.algorithms import UserCF
 from libreco.evaluation import evaluate
 
 data = pd.read_csv("u.data", sep="::",
@@ -34,3 +35,20 @@ print("cold prediction: ", svdpp.predict(user="ccc", item="not item",
 print("cold recommendation: ", svdpp.recommend_user(user="are we good?",
                                                     n_rec=7,
                                                     cold_start="popular"))
+
+
+knn = UserCF(task="rating", data_info=data_info)
+# monitor metrics on eval_data during training
+knn.fit(train_data, verbose=2, eval_data=eval_data, metrics=["rmse", "mae", "r2"])
+
+# do final evaluation on test data
+print("evaluate_result: ", evaluate(model=svdpp, data=test_data, metrics=["rmse", "mae"]))
+# predict preference of user 2211 to item 110
+print("prediction: ", knn.predict(user=2211, item=110))
+# recommend 7 items for user 2211
+print("recommendation: ", knn.recommend_user(user=2211, n_rec=7))
+
+# cold-start prediction
+#print("cold prediction: ", knn.predict(user="ccc", item="not item",cold_start="average"))
+# cold-start recommendation
+#print("cold recommendation: ", knn.recommend_user(user="are we good?",n_rec=7,cold_start="popular"))
