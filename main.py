@@ -1,9 +1,10 @@
 import numpy as np
 import pandas as pd
 from libreco.data import random_split, DatasetPure
-from libreco.algorithms import SVDpp  # pure data, algorithm SVD++
+from libreco.algorithms import SVDpp, user_cf # pure data, algorithm SVD++
 from libreco.algorithms import UserCF
 from libreco.evaluation import evaluate
+
 
 data = pd.read_csv("u.data", sep="::",
                    names=["user", "item", "label", "time"])
@@ -16,6 +17,7 @@ eval_data = DatasetPure.build_evalset(eval_data)
 test_data = DatasetPure.build_testset(test_data)
 print(data_info)   # n_users: 5894, n_items: 3253, data sparsity: 0.4172 %
 
+#svdpp = user_cf.UserCF(task="rating", data_info=data_info)
 svdpp = SVDpp(task="rating", data_info=data_info, embed_size=16, n_epochs=3, lr=0.001,
               reg=None, batch_size=256)
 # monitor metrics on eval_data during training
