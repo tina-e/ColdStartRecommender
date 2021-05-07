@@ -3,11 +3,11 @@ from mysql.connector import errorcode
 import random
 
 
-def get_similar_users(db, k, category):
-    recipes = get_recipes_by_category(cnx.cursor(), category)
+def get_similar_users(cursor, k, category):
+    recipes = get_recipes_by_category(cursor, category)
     users = []
     for recipe_id in recipes:
-        users.append(get_users_who_rated_recipe(db.cursor(), recipe_id[0]))
+        users.append(get_users_who_rated_recipe(cursor, recipe_id[0]))
     print(len(list(dict.fromkeys([item for sublist in users for item in sublist]))))
     return list(dict.fromkeys([item for sublist in users for item in sublist]))[0:k] #TODO pick out k ? random.shuffle(list) [0:k] klappt iwie nicht weil shuffle none liefert
 
@@ -24,22 +24,27 @@ def get_recipes_by_category(cursor, category):
     return [el for el in cursor]
 
 
-def get_pseudo_ratings(cursor, similar_pref_users):
+def get_pseudo_ratings(cursor, similar_pref_users, only_multiple_occurence):
     target_values = ' OR '.join(f"link_name='{elem}'" for elem in similar_pref_users)
     query = f"SELECT id, rating FROM kochbar_recipes_ratings WHERE {target_values}"
+    #query = f"SELECT count(id), id, rating FROM kochbar_recipes_ratings WHERE {target_values} GROUP BY id, rating HAVING count(id) > 1"
     cursor.execute(query)
 
-    pseudo_ratings = {}
+    collected_ratings = {}
     for elem in cursor:
-        pseudo_ratings.setdefault(elem[0], []).append(int(elem[1]))
-    pseudo_ratings = [(key, sum(values) / len(values)) for key, values in pseudo_ratings.items()]
+        collected_ratings.setdefault(elem[0], []).append(int(elem[1]))
 
-    return pseudo_ratings
+    if only_multiple_occurence:
+        pseudo_ratings = {}
+        for key, values in collected_ratings.items():
+            if len(values) > 1:
+                pseudo_ratings[key] = sum(values) / len(values)
+        return pseudo_ratings
+    return [(key, sum(values) / len(values)) for key, values in collected_ratings.items()]
 
 
 try:
-    cnx = mysql.connector.connect(user='readonly', password='RoPlCa_readonly', host='132.199.143.90', port='8306',
-                                  database='kochbar')
+      cnx = mysql.connector.connect(user='readonly', password='RoPlCa_readonly', host='132.199.143.90', port='8306', database='kochbar')
 except mysql.connector.Error as err:
     if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
         print("Something is wrong with your user name or password")
@@ -49,16 +54,20 @@ except mysql.connector.Error as err:
         print(err)
 
 else:
+    cursor = cnx.cursor()
 
-    k = 5
+    k = 10
     category = "veggie_overlap"
 
-    similar_pref_users = get_similar_users(cnx, k, category)
+    similar_pref_users = get_similar_users(cursor, k, category)
     print(similar_pref_users)
 
-    pseudo_ratings = get_pseudo_ratings(cnx.cursor(), similar_pref_users)
+    pseudo_ratings = get_pseudo_ratings(cursor, similar_pref_users, True)
+    for key, value in pseudo_ratings.items():
+        print(key, value)
+    print(len(pseudo_ratings))
     cnx.close()
-    print(pseudo_ratings)
+
 
     # cursor = cnx.cursor()
     # query = ("SELECT * FROM kochbar_recipes ORDER BY title LIMIT 10")
