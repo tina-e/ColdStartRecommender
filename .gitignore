@@ -8,6 +8,10 @@ __pycache__/
 # C extensions
 *.so
 
+data/countries.csv
+data/recipes.csv
+data/reviews.csv
+
 # Distribution / packaging
 .Python
 env/
