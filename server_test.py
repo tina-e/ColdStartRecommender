@@ -1,6 +1,7 @@
 import mysql.connector
 from mysql.connector import errorcode
 import random
+import csv
 
 
 def get_similar_users(cursor, k, category):
@@ -29,8 +30,11 @@ def get_recipes_by_category(cursor, category):
 def get_pseudo_ratings(cursor, similar_pref_users, only_multiple_occurence):
     target_values = ' OR '.join(f"link_name='{elem}'" for elem in similar_pref_users)
     query = f"SELECT id, rating FROM kochbar_recipes_ratings WHERE {target_values}"
+    print(query)
     #query = f"SELECT count(id), id, rating FROM kochbar_recipes_ratings WHERE {target_values} GROUP BY id, rating HAVING count(id) > 1"
+    return "Test"
     cursor.execute(query)
+
 
     collected_ratings = {}
     for elem in cursor:
@@ -60,17 +64,29 @@ except mysql.connector.Error as err:
         print(err)
 
 else:
+    #qu = "SELECT id, link_name, rating FROM kochbar_recipes_ratings" #-> reviews.csv
+    #qu = "SELECT * FROM feature_table" #-> recipes.csv
+    qu = "SELECT * FROM kochbar_recipes_category LIMIT 10" #->countries.csv
     cursor = cnx.cursor()
+    cursor.execute(qu)
+    #for el in cursor:
+    #    print(el)
 
+    rows = cursor.fetchall()
+    fp = open('./data/countries.csv', 'w', encoding="utf-8", newline='')
+    myFile = csv.writer(fp, delimiter = ",")
+    myFile.writerows(rows)
+    fp.close()
     k = 10
     #category = "veggie_overlap"
-    similar_pref_users1 = get_similar_users(cursor, k, "roasts_overlap")
-    similar_pref_users2 = get_similar_users(cursor, k, "pizza_overlap")
-    similar_pref_users3 = get_similar_users(cursor, k, "candy_overlap")
+    #similar_pref_users1 = get_similar_users(cursor, k, "roasts_overlap")
+    #similar_pref_users2 = get_similar_users(cursor, k, "pizza_overlap")
+    #similar_pref_users3 = get_similar_users(cursor, k, "candy_overlap")
     #roast pizza candy -> 864
-    print(len(intersection(intersection(similar_pref_users1, similar_pref_users2),similar_pref_users3)))
-
-    #pseudo_ratings = get_pseudo_ratings(cursor, similar_pref_users, True)
+    #print(len(intersection(intersection(similar_pref_users1, similar_pref_users2),similar_pref_users3)))
+    #similar_pref_users = intersection(intersection(similar_pref_users1, similar_pref_users2),similar_pref_users3)
+    #print(len(similar_pref_users))
+    #pseudo_ratings = get_pseudo_ratings(cursor, similar_pref_users[:10], False)
     #for key, value in pseudo_ratings.items():
     #    print(key, value)
     #print(len(pseudo_ratings))
