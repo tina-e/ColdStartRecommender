@@ -37,7 +37,7 @@ type = "None"
 users = {}
 
 
-num = 50000
+num = 7796003
 for i in range(num):
     line = file.readline()[0:-1]
     # print(line)
@@ -62,7 +62,7 @@ with open('./data/users.csv', 'a', encoding="utf-8") as file:
             favorite = -1
         else:
             favorite = np.argmax(v)
-            print("line: " + k + "" + np.array2string(v) + str(favorite))
+            #print("line: " + k + "" + np.array2string(v) + str(favorite))
             file.write(k + "," + str(favorite) + "\n")
 
     # print(sum(1 for line in f))

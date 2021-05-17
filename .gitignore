@@ -154,3 +154,5 @@ crashlytics.properties
 crashlytics-build.properties
 fabric.properties
 /data/users.csv
+data/reviewsV2.csv
+data/difficulty_price.csv

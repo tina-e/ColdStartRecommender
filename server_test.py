@@ -2,7 +2,8 @@ import mysql.connector
 from mysql.connector import errorcode
 import random
 import csv
-
+import numpy as np
+import time
 
 def get_similar_users(cursor, k, category):
     recipes = get_recipes_by_category(cursor, category)
@@ -26,13 +27,25 @@ def get_recipes_by_category(cursor, category):
     cursor.execute(query)
     return [el for el in cursor]
 
+def get_pseudo_ratings_from_file(similar_pref_users):
+    recipes = {}
+    user_file = open("./data/reviewsV2.csv", encoding="utf-8")
+    for x in range(7796004):  # 7796004
+        line = user_file.readline()[0:-1].split(",")
+        #print(x/7796004)
+        if line[0] in similar_pref_users:
+            recipes[line[1]] = 5
+    return recipes
+
+
+
 
 def get_pseudo_ratings(cursor, similar_pref_users, only_multiple_occurence):
     target_values = ' OR '.join(f"link_name='{elem}'" for elem in similar_pref_users)
     query = f"SELECT id, rating FROM kochbar_recipes_ratings WHERE {target_values}"
     print(query)
-    #query = f"SELECT count(id), id, rating FROM kochbar_recipes_ratings WHERE {target_values} GROUP BY id, rating HAVING count(id) > 1"
-    return "Test"
+    query = f"SELECT count(id), id, rating FROM kochbar_recipes_ratings WHERE {target_values} GROUP BY id, rating HAVING count(id) > 1"
+    #return "Test"
     cursor.execute(query)
 
 
@@ -53,6 +66,15 @@ def intersection(lst1, lst2):
     lst3 = [value for value in lst1 if value in lst2]
     return lst3
 
+def get_similar_users_from_file(list_of_categories):
+    similar_users = []
+    user_file = open("./data/users.csv", encoding="utf-8")
+    for x in range(16187):  # 16187
+        line = user_file.readline()[0:-1].split(",")
+        if int(line[1]) in list_of_categories:
+            similar_users.append(line[0])
+    return similar_users
+
 try:
       cnx = mysql.connector.connect(user='readonly', password='RoPlCa_readonly', host='132.199.143.90', port='8306', database='kochbar')
 except mysql.connector.Error as err:
@@ -64,21 +86,26 @@ except mysql.connector.Error as err:
         print(err)
 
 else:
+    start_time = time.time()
     #qu = "SELECT id, link_name, rating FROM kochbar_recipes_ratings" #-> reviews.csv
+    #qu = "SELECT recipe_href, Schwierigkeitsgrad, Preiskategorie FROM kochbar_recipes" #-> reviews.csv
     #qu = "SELECT * FROM feature_table" #-> recipes.csv
-    qu = "SELECT * FROM kochbar_recipes_category LIMIT 10" #->countries.csv
+    ##qu = "SELECT * FROM kochbar_recipes_category LIMIT 10" #->countries.csv
     cursor = cnx.cursor()
-    cursor.execute(qu)
+    #cursor.execute(qu)
     #for el in cursor:
     #    print(el)
 
-    rows = cursor.fetchall()
-    fp = open('./data/countries.csv', 'w', encoding="utf-8", newline='')
-    myFile = csv.writer(fp, delimiter = ",")
-    myFile.writerows(rows)
-    fp.close()
-    k = 10
-    #category = "veggie_overlap"
+    #rows = cursor.fetchall()
+    #fp = open('./data/challenge.csv', 'w', encoding="utf-8", newline='')
+    #myFile = csv.writer(fp, delimiter = ",")
+    #myFile.writerows(rows)
+    #fp.close()
+    #k = 10
+    categories = [6, 23, 21]
+    similar_users = get_similar_users_from_file(categories)
+    print(similar_users)
+    print("length of similar users: " + str(len(similar_users)))
     #similar_pref_users1 = get_similar_users(cursor, k, "roasts_overlap")
     #similar_pref_users2 = get_similar_users(cursor, k, "pizza_overlap")
     #similar_pref_users3 = get_similar_users(cursor, k, "candy_overlap")
@@ -86,10 +113,10 @@ else:
     #print(len(intersection(intersection(similar_pref_users1, similar_pref_users2),similar_pref_users3)))
     #similar_pref_users = intersection(intersection(similar_pref_users1, similar_pref_users2),similar_pref_users3)
     #print(len(similar_pref_users))
-    #pseudo_ratings = get_pseudo_ratings(cursor, similar_pref_users[:10], False)
+    pseudo_ratings = get_pseudo_ratings_from_file(similar_users)
     #for key, value in pseudo_ratings.items():
     #    print(key, value)
-    #print(len(pseudo_ratings))
+    print(len(pseudo_ratings.keys()))
     cnx.close()
 
 
@@ -99,3 +126,4 @@ else:
     # for element in cursor:
     #    print(element)
     # cnx.close()
+    print("--- %s seconds ---" % (time.time() - start_time))
