@@ -6,7 +6,7 @@ from libreco.algorithms import UserCF
 
 class UserCF_Recommender:
     def __init__(self):
-        self.data = pandas.read_csv("reviewsV2.csv", sep=",", names=["user", "item", "label"])
+        self.data = pandas.read_csv("data/reviewsV2.csv", sep=",", names=["user", "item", "label"])
         # self.data.to_pickle("dataframe.pkl")
         # self.fit_algorithm()
         self.user_list = self.data['user'].tolist()
@@ -20,7 +20,7 @@ class UserCF_Recommender:
     def add_user(self, user):
         user_df = pandas.DataFrame(columns=["user", "item", "label"])
         for recipe, rating in user.pseudo_ratings.items():
-            user_df = user_df.append([user.name, recipe, rating], columns=["user", "item", "label"])
+            user_df = user_df.append([user.name, recipe, rating])
         self.data.append(user_df)
         self.fit_algorithm()
 

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>736</width>
-    <height>377</height>
+    <width>732</width>
+    <height>368</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -135,7 +135,7 @@ p, li { white-space: pre-wrap; }
          </widget>
         </item>
         <item row="3" column="0">
-         <widget class="QPushButton" name="main_dish_overlay">
+         <widget class="QPushButton" name="main_dish_overlap">
           <property name="text">
            <string>Main Dish</string>
           </property>
@@ -165,7 +165,7 @@ p, li { white-space: pre-wrap; }
          </widget>
         </item>
         <item row="3" column="1">
-         <widget class="QPushButton" name="side_dish_overlay">
+         <widget class="QPushButton" name="side_dish_overlap">
           <property name="text">
            <string>Side Dish</string>
           </property>
@@ -479,6 +479,9 @@ p, li { white-space: pre-wrap; }
         </item>
         <item>
          <widget class="QCheckBox" name="lactose_checkbox">
+          <property name="enabled">
+           <bool>true</bool>
+          </property>
           <property name="text">
            <string>laktose</string>
           </property>

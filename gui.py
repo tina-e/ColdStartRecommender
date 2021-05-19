@@ -102,7 +102,7 @@ class RecommenderInterface(QMainWindow):
 
         # calc recommendations
         self.system.add_user(self.new_user)
-        recommendations = self.system.recommend_items(self.username, 10)
+        recommendations = self.system.recommend_items(self.new_user.name, 10)
 
         # display recommendations TODO: hübsch darstellen (optional)
         olds, news = self.split_recommendations(recommendations)
@@ -144,9 +144,10 @@ class RecommenderInterface(QMainWindow):
                 recipes[line[1]] = 5
         return recipes
 
+    #TODO
     def modify_pseudo_ratings(self, recipe_list):
         print("?")
-        return ""
+        return recipe_list
 
     def get_pseudo_ratings(self, overlap_categories):
         similar_users = self.get_similar_users(overlap_categories)
@@ -154,7 +155,8 @@ class RecommenderInterface(QMainWindow):
         pseudo_ratings = self.get_recipes_from_users(similar_users)
         print(pseudo_ratings)
         pseudo_ratings = self.modify_pseudo_ratings(pseudo_ratings)
-        print("ratings after modification: " + pseudo_ratings)
+        # print("ratings after modification: " + pseudo_ratings)
+        return pseudo_ratings
 
 
 if __name__ == "__main__":
