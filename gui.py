@@ -97,7 +97,8 @@ class RecommenderInterface(QMainWindow):
         self.next_button.setText("Loading Recommendations...")
 
         # TODO: find similar users
-        # self.new_user.pseudo_ratings = get_pseudo_ratings(self.new_user.get_category_indices())
+        #self.new_user.get_pseudo_ratings(["candy_overlap", "seafood_overlap"])
+        self.new_user.pseudo_ratings = self.get_pseudo_ratings(self.new_user.get_category_indices())
 
         # calc recommendations
         self.system.add_user(self.new_user)
@@ -124,6 +125,36 @@ class RecommenderInterface(QMainWindow):
                 else:
                     news.append(recommendation)
         return olds, news
+
+    def get_similar_users(self, list_of_categories):
+        return_users = []
+        user_file = open("./data/users.csv", encoding="utf-8")
+        for x in range(16187):  # 16187
+            line = user_file.readline()[0:-1].split(",")
+            if int(line[1]) in list_of_categories:
+                return_users.append(line[0])
+        return return_users
+
+    def get_recipes_from_users(self, similar_pref_users):
+        recipes = {}
+        user_file = open("./data/reviewsV2.csv", encoding="utf-8")
+        for x in range(7796004):  # 7796004
+            line = user_file.readline()[0:-1].split(",")
+            if line[0] in similar_pref_users:
+                recipes[line[1]] = 5
+        return recipes
+
+    def modify_pseudo_ratings(self, recipe_list):
+        print("?")
+        return ""
+
+    def get_pseudo_ratings(self, overlap_categories):
+        similar_users = self.get_similar_users(overlap_categories)
+        print("number of similar users: " + str(len(similar_users)))
+        pseudo_ratings = self.get_recipes_from_users(similar_users)
+        print(pseudo_ratings)
+        pseudo_ratings = self.modify_pseudo_ratings(pseudo_ratings)
+        print("ratings after modification: " + pseudo_ratings)
 
 
 if __name__ == "__main__":
