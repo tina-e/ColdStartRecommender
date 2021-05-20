@@ -95,10 +95,9 @@ class RecommenderInterface(QMainWindow):
 
     def display_recommendations(self):
         self.next_button.setText("Loading Recommendations...")
-
-        # TODO: find similar users
-        #self.new_user.get_pseudo_ratings(["candy_overlap", "seafood_overlap"])
-        self.new_user.pseudo_ratings = self.get_pseudo_ratings(self.new_user.get_category_indices())
+        #TODO shift this to user
+        difficulty_price = ["leicht", 3]
+        self.new_user.pseudo_ratings = self.get_pseudo_ratings(self.new_user.get_category_indices(), difficulty_price)
 
         # calc recommendations
         self.system.add_user(self.new_user)
@@ -144,18 +143,25 @@ class RecommenderInterface(QMainWindow):
                 recipes[line[1]] = 5
         return recipes
 
-    #TODO
-    def modify_pseudo_ratings(self, recipe_list):
-        print("?")
+    def modify_pseudo_ratings(self, recipe_list, diff_price):
+        user_file = open("./data/difficulty_price.csv", encoding="utf-8")
+        for x in range(405863):  # 405863
+            line = user_file.readline()[0:-1].split(",")
+            if line[0] in recipe_list.keys():
+                if diff_price[0] != line[1]:  # modify if difficulty doesnt match - values leicht mittel schwer
+                    recipe_list[line[0]] = recipe_list[line[0]] - 1
+                if diff_price[1] != line[2]:  # modify if price category doesnt match - values 1 3 5
+                    recipe_list[line[0]] = recipe_list[line[0]] - 1
         return recipe_list
 
-    def get_pseudo_ratings(self, overlap_categories):
+    def get_pseudo_ratings(self, overlap_categories, diff_price):
         similar_users = self.get_similar_users(overlap_categories)
         print("number of similar users: " + str(len(similar_users)))
         pseudo_ratings = self.get_recipes_from_users(similar_users)
         print(pseudo_ratings)
-        pseudo_ratings = self.modify_pseudo_ratings(pseudo_ratings)
-        # print("ratings after modification: " + pseudo_ratings)
+        pseudo_ratings = self.modify_pseudo_ratings(pseudo_ratings, diff_price)
+        print("ratings after modification: ")
+        print(pseudo_ratings)
         return pseudo_ratings
 
 
