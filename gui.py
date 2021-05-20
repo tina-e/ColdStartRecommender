@@ -81,7 +81,7 @@ class RecommenderInterface(QMainWindow):
             if self.input_username.text() in self.system.user_list:
                 self.label_error.setText("Username belegt.")
                 return False
-            self.new_user = User(self.input_username.text())
+            self.new_user = User(self.input_username.text(), self.input_level.text(), self.input_budget.text())
 
         # type selection pages
         elif 'category' in stack_name:
@@ -95,9 +95,7 @@ class RecommenderInterface(QMainWindow):
 
     def display_recommendations(self):
         self.next_button.setText("Loading Recommendations...")
-        #TODO shift this to user
-        difficulty_price = ["leicht", 3]
-        self.new_user.pseudo_ratings = self.get_pseudo_ratings(self.new_user.get_category_indices(), difficulty_price)
+        self.new_user.pseudo_ratings = self.get_pseudo_ratings(self.new_user)
 
         # calc recommendations
         self.system.add_user(self.new_user)
@@ -113,7 +111,6 @@ class RecommenderInterface(QMainWindow):
 
         # TODO: prototypisch erlauben, vorgeschlagenes Rezept zu bewerten und die Recommendations updaten sich
         self.next_button.setText("Update Recommendations")
-        print("done!")
 
 
     def split_recommendations(self, recommendations):
@@ -129,6 +126,7 @@ class RecommenderInterface(QMainWindow):
         return olds, news
 
 
+    # TODO: csv-handling in eigens File auslagen?
     def get_similar_users(self, list_of_categories):
         return_users = []
         user_file = open("./data/users.csv", encoding="utf-8")
@@ -158,7 +156,10 @@ class RecommenderInterface(QMainWindow):
                     recipe_list[line[0]] = recipe_list[line[0]] - 1
         return recipe_list
 
-    def get_pseudo_ratings(self, overlap_categories, diff_price):
+    def get_pseudo_ratings(self, user):
+        overlap_categories = user.get_category_indices()
+        diff_price = [user.level, user.budget]
+
         similar_users = self.get_similar_users(overlap_categories)
         print("number of similar users: " + str(len(similar_users)))
         pseudo_ratings = self.get_recipes_from_users(similar_users)

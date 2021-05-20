@@ -1,6 +1,8 @@
 class User:
-    def __init__(self, name):
+    def __init__(self, name, level, budget):
         self.name = name
+        self.level = level
+        self.budget = budget
         self.category_list = []
         self.unwanted_ingredients = []
         self.has_lactose_intolerance = False
