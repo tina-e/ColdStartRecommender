@@ -81,7 +81,10 @@ class RecommenderInterface(QMainWindow):
             if self.input_username.text() in self.system.user_list:
                 self.label_error.setText("Username belegt.")
                 return False
-            self.new_user = User(self.input_username.text(), self.input_level.text(), self.input_budget.text())
+            if self.input_budget.text() == 'kleines Budget': budget = 1
+            elif self.input_budget.text() == 'mittleres Budget': budget = 3
+            elif self.input_budget.text() == 'höheres Budget': budget = 5
+            self.new_user = User(self.input_username.text(), self.input_level.text(), budget)
 
         # type selection pages
         elif 'category' in stack_name:
