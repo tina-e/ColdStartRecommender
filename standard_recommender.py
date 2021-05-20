@@ -17,11 +17,17 @@ class UserCF_Recommender:
         self.user_cf = UserCF(task="rating", data_info=self.data_info)
         self.user_cf.fit(data)
 
+    # TODO: fix "unknown user"
     def add_user(self, user):
-        user_df = pandas.DataFrame(columns=["user", "item", "label"])
+        print(user.pseudo_ratings)
+        # user_df = pandas.DataFrame(columns=["user", "item", "label"])
+        user_data = []
         for recipe, rating in user.pseudo_ratings.items():
-            user_df = user_df.append([user.name, recipe, rating])
-        self.data.append(user_df)
+            user_data.append([user.name, recipe, rating])
+            # user_df = user_df.append([user.name, recipe, rating], columns=["user", "item", "label"])
+        user_df = pandas.DataFrame(user_data, columns=['user', 'item', 'label'])
+        print(user_df)
+        self.data = self.data.append(user_df)
         self.fit_algorithm()
 
     def recommend_items(self, user, num_of_recommendations):

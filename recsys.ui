@@ -27,7 +27,7 @@
       <property name="currentIndex">
        <number>0</number>
       </property>
-      <widget class="QWidget" name="page">
+      <widget class="QWidget" name="start_page">
        <layout class="QVBoxLayout" name="verticalLayout_3">
         <item>
          <widget class="QTextBrowser" name="textBrowser">
@@ -112,7 +112,7 @@ p, li { white-space: pre-wrap; }
         </item>
        </layout>
       </widget>
-      <widget class="QWidget" name="page_2">
+      <widget class="QWidget" name="category_page_0">
        <layout class="QGridLayout" name="gridLayout_2">
         <item row="4" column="0">
          <widget class="QPushButton" name="everyday_cooking_overlap">
@@ -176,7 +176,7 @@ p, li { white-space: pre-wrap; }
         </item>
        </layout>
       </widget>
-      <widget class="QWidget" name="page_3">
+      <widget class="QWidget" name="category_page_1">
        <layout class="QGridLayout" name="gridLayout_3">
         <item row="2" column="0">
          <widget class="QPushButton" name="seafood_overlap">
@@ -240,7 +240,7 @@ p, li { white-space: pre-wrap; }
         </item>
        </layout>
       </widget>
-      <widget class="QWidget" name="page_4">
+      <widget class="QWidget" name="category_page_2">
        <layout class="QGridLayout" name="gridLayout_4">
         <item row="1" column="0">
          <widget class="QPushButton" name="dips_and_spreads_overlap">
@@ -304,7 +304,7 @@ p, li { white-space: pre-wrap; }
         </item>
        </layout>
       </widget>
-      <widget class="QWidget" name="page_5">
+      <widget class="QWidget" name="category_page_3">
        <layout class="QGridLayout" name="gridLayout_5">
         <item row="0" column="1">
          <widget class="QPushButton" name="pasta_and_noodels_overlap">
@@ -375,7 +375,7 @@ p, li { white-space: pre-wrap; }
         </item>
        </layout>
       </widget>
-      <widget class="QWidget" name="page_6">
+      <widget class="QWidget" name="category_page_4">
        <layout class="QGridLayout" name="gridLayout_6">
         <item row="1" column="0">
          <widget class="QPushButton" name="cookies_overlap">
@@ -416,53 +416,7 @@ p, li { white-space: pre-wrap; }
         </item>
        </layout>
       </widget>
-      <widget class="QWidget" name="page_7">
-       <layout class="QGridLayout" name="gridLayout_7">
-        <item row="3" column="1">
-         <widget class="QPushButton" name="latin_continent_button">
-          <property name="text">
-           <string>Latin</string>
-          </property>
-         </widget>
-        </item>
-        <item row="1" column="1">
-         <widget class="QPushButton" name="african_continent_button">
-          <property name="text">
-           <string>Africa</string>
-          </property>
-         </widget>
-        </item>
-        <item row="3" column="0">
-         <widget class="QPushButton" name="american_continent_button">
-          <property name="text">
-           <string>America</string>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="1">
-         <widget class="QPushButton" name="european_continent_button">
-          <property name="text">
-           <string>European</string>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="0">
-         <widget class="QPushButton" name="asian_continent_button_2">
-          <property name="text">
-           <string>Asian</string>
-          </property>
-         </widget>
-        </item>
-        <item row="1" column="0">
-         <widget class="QPushButton" name="orient_continent_button">
-          <property name="text">
-           <string>Orient</string>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </widget>
-      <widget class="QWidget" name="page_9">
+      <widget class="QWidget" name="unwanted_page">
        <layout class="QVBoxLayout" name="verticalLayout_2">
         <item>
          <widget class="QLabel" name="label_4">
@@ -560,7 +514,7 @@ p, li { white-space: pre-wrap; }
         </item>
        </layout>
       </widget>
-      <widget class="QWidget" name="page_8">
+      <widget class="QWidget" name="recommendations_page">
        <layout class="QHBoxLayout" name="horizontalLayout">
         <item>
          <layout class="QVBoxLayout" name="verticalLayout">

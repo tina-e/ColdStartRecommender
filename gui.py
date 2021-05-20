@@ -28,7 +28,6 @@ class RecommenderInterface(QMainWindow):
         self.new_user = None
         self.button = None
         for button in self.buttonGroup.buttons():
-            print(type(button))
             button.clicked.connect(lambda _, b=button: self.on_type_clicked(b))
 
         self.old_recommendations_model = QStringListModel()
@@ -36,9 +35,10 @@ class RecommenderInterface(QMainWindow):
 
 
     def switch_to_next_stack(self):
+        name_current_stack = self.stacked_widget.currentWidget().objectName()
         num_current_stack = self.stacked_widget.currentIndex()
         # last page before switching to recommendation-page
-        if num_current_stack == 7:
+        if name_current_stack == 'unwanted_page':
             self.new_user.has_lactose_intolerance = (self.lactose_checkbox.checkState() == Qt.CheckState.Checked)
             self.new_user.has_gluten_intolerance = (self.gluten_checkbox.checkState() == Qt.CheckState.Checked)
             # TODO: unwanted ingredients
@@ -47,14 +47,14 @@ class RecommenderInterface(QMainWindow):
             self.display_recommendations()
 
         # is on recommendation-page -> update recommendations
-        elif num_current_stack == 8:
+        elif name_current_stack == 'recommendations_page':
             self.display_recommendations()
 
         # switch any other page
-        elif self.is_valid_input(num_current_stack):
-            if num_current_stack == 0:
+        elif self.is_valid_input(name_current_stack):
+            if name_current_stack == 'start_page':
                 self.label_instructions.setText(f"Wähle bis zu {self.max_category_selected_counter} Kategorien, die dir am meisten zusagen.")
-            elif num_current_stack == 5:
+            elif name_current_stack == 'category_page_4':
                 self.label_instructions.hide()
             self.label_error.setText("")
             self.stacked_widget.setCurrentIndex(num_current_stack + 1)
@@ -72,9 +72,9 @@ class RecommenderInterface(QMainWindow):
             self.category_selected_counter = self.category_selected_counter + 1
 
 
-    def is_valid_input(self, stack_num):
+    def is_valid_input(self, stack_name):
         # start page
-        if stack_num == 0:
+        if stack_name == 'start_page':
             if not self.input_username.text().strip() or not self.input_budget or not self.input_level:
                 self.label_error.setText("Nicht alle Felder ausgefüllt.")
                 return False
@@ -84,7 +84,7 @@ class RecommenderInterface(QMainWindow):
             self.new_user = User(self.input_username.text())
 
         # type selection pages
-        elif stack_num in range(1, 6):
+        elif 'category' in stack_name:
             if not (0 < self.category_selected_counter <= self.max_category_selected_counter):
                 self.label_error.setText(f"Wähle mind. 1 und max. {self.max_category_selected_counter} aus.")
                 return False
@@ -102,6 +102,7 @@ class RecommenderInterface(QMainWindow):
         # calc recommendations
         self.system.add_user(self.new_user)
         recommendations = self.system.recommend_items(self.new_user.name, 10)
+        print(recommendations)
 
         # display recommendations TODO: hübsch darstellen (optional)
         olds, news = self.split_recommendations(recommendations)
@@ -112,18 +113,21 @@ class RecommenderInterface(QMainWindow):
 
         # TODO: prototypisch erlauben, vorgeschlagenes Rezept zu bewerten und die Recommendations updaten sich
         self.next_button.setText("Update Recommendations")
+        print("done!")
 
 
     def split_recommendations(self, recommendations):
         olds = []
         news = []
         for recommendation in recommendations:
-            for category in self.new_user.category_list:
-                if recipe.is_recipe_in_category(recommendation, category):
-                    olds.append(recommendation)
-                else:
-                    news.append(recommendation)
+            recipe_categories = recipe.get_categories_by_href(recommendation)
+            user_categories = self.new_user.get_category_indices()
+            if any(category in recipe_categories for category in user_categories):
+                olds.append(recommendation)
+            else:
+                news.append(recommendation)
         return olds, news
+
 
     def get_similar_users(self, list_of_categories):
         return_users = []
