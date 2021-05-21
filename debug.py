@@ -64,7 +64,6 @@ for overlap in recipe_types:
     user.pseudo_ratings = get_pseudo_ratings(user)
     system.add_user(user)
     recommendations = system.recommend_items(user.name, 10)
-    problematics.append(overlap)
     print(f"recommendations for {overlap}")
     print(recommendations)
 
