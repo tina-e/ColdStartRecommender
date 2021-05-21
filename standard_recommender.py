@@ -19,19 +19,22 @@ class UserCF_Recommender:
 
     # TODO: fix "unknown user"
     def add_user(self, user):
-        print(user.pseudo_ratings)
-        # user_df = pandas.DataFrame(columns=["user", "item", "label"])
+        if len(user.ratings) == 0:
+            ratings_to_add = user.pseudo_ratings
+        else:
+            ratings_to_add = user.ratings
         user_data = []
-        for recipe, rating in user.pseudo_ratings.items():
+        for recipe, rating in ratings_to_add.items():
             user_data.append([user.name, recipe, rating])
             # user_df = user_df.append([user.name, recipe, rating], columns=["user", "item", "label"])
         user_df = pandas.DataFrame(user_data, columns=['user', 'item', 'label'])
-        print(user_df)
         self.data = self.data.append(user_df)
         self.fit_algorithm()
 
     def recommend_items(self, user, num_of_recommendations):
         recommended_items = self.user_cf.recommend_user(user, num_of_recommendations)
+        #self.user_cf.
+        #if len(recommended_items) > 0:
         recommended_items = [self.data_info.id2item.get(reco[0]) for reco in recommended_items]
         return recommended_items
 

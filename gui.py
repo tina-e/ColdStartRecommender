@@ -19,6 +19,7 @@ class RecommenderInterface(QMainWindow):
         self.system = UserCF_Recommender()
         QMainWindow.__init__(self)
         uic.loadUi("recsys.ui", self)
+        self.rating_combobox.hide()
 
         self.category_selected_counter = 0
         self.max_category_selected_counter = 2
@@ -32,6 +33,8 @@ class RecommenderInterface(QMainWindow):
 
         self.old_recommendations_model = QStringListModel()
         self.new_recommendations_model = QStringListModel()
+        self.old_view.itemSelectionChanged.connect(self.update_ratings)
+        self.new_view.itemSelectionChanged.connect(self.update_ratings)
 
 
     def switch_to_next_stack(self):
@@ -44,11 +47,13 @@ class RecommenderInterface(QMainWindow):
             # TODO: unwanted ingredients
             # self.new_user.unwanted_ingredients =
             self.stacked_widget.setCurrentIndex(num_current_stack + 1)
+            self.rating_combobox.show()
+            self.label_instructions.setText("Zum Bewerten: Bewertung wählen und Rezept anklicken")
             self.display_recommendations()
 
         # is on recommendation-page -> update recommendations
         elif name_current_stack == 'recommendations_page':
-            self.display_recommendations()
+            self.update_recommendations()
 
         # switch any other page
         elif self.is_valid_input(name_current_stack):
@@ -105,16 +110,21 @@ class RecommenderInterface(QMainWindow):
         recommendations = self.system.recommend_items(self.new_user.name, 10)
         print(recommendations)
 
-        # display recommendations TODO: hübsch darstellen (optional)
+        # display recommendations
         olds, news = self.split_recommendations(recommendations)
         self.old_recommendations_model.setStringList(olds)
         self.new_recommendations_model.setStringList(news)
         self.old_view.setModel(self.old_recommendations_model)
         self.new_view.setModel(self.new_recommendations_model)
 
-        # TODO: prototypisch erlauben, vorgeschlagenes Rezept zu bewerten und die Recommendations updaten sich
         self.next_button.setText("Update Recommendations")
 
+    def update_ratings(self):
+        view = self.old_view.selectedItems()
+        if len(self.new_view.selectedItems()) != 0: view = self.new_view.selectedItems()
+        selected_item = view.selectedItems()
+        selected_rating = self.rating_combobox.currentText().split(" ")[0]
+        self.new_user.ratings[selected_item] = selected_rating
 
     def split_recommendations(self, recommendations):
         olds = []

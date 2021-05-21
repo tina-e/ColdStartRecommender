@@ -15,17 +15,57 @@
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="gridLayout">
-    <item row="4" column="0">
+    <item row="6" column="0">
      <widget class="QPushButton" name="next_button">
       <property name="text">
        <string>Weiter</string>
       </property>
      </widget>
     </item>
+    <item row="3" column="0">
+     <layout class="QHBoxLayout" name="horizontalLayout_2">
+      <item>
+       <widget class="QComboBox" name="rating_combobox">
+        <item>
+         <property name="text">
+          <string>1 Stern</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>2 Sterne</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>3 Sterne</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>4 Sterne</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>5 Sterne</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item row="0" column="0">
+     <widget class="QLabel" name="label_instructions">
+      <property name="text">
+       <string/>
+      </property>
+     </widget>
+    </item>
     <item row="1" column="0">
      <widget class="QStackedWidget" name="stacked_widget">
       <property name="currentIndex">
-       <number>0</number>
+       <number>7</number>
       </property>
       <widget class="QWidget" name="start_page">
        <layout class="QVBoxLayout" name="verticalLayout_3">
@@ -548,18 +588,11 @@ p, li { white-space: pre-wrap; }
       </widget>
      </widget>
     </item>
-    <item row="3" column="0">
+    <item row="5" column="0">
      <widget class="QLabel" name="label_error">
       <property name="enabled">
        <bool>true</bool>
       </property>
-      <property name="text">
-       <string/>
-      </property>
-     </widget>
-    </item>
-    <item row="0" column="0">
-     <widget class="QLabel" name="label_instructions">
       <property name="text">
        <string/>
       </property>
