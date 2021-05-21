@@ -104,12 +104,14 @@ class RecommenderInterface(QMainWindow):
         # calc recommendations
         self.system.add_user(self.new_user)
         recommendations = self.system.recommend_items(self.new_user.name, 20)
+
         print(recommendations)
 
         # display recommendations TODO: hübsch darstellen (optional)
         olds, news = self.split_recommendations(recommendations)
-        self.old_recommendations_model.setStringList(olds)
-        self.new_recommendations_model.setStringList(news)
+        # TODO diese recommendations sollten permanent gemacht werden, um gelikte dann wiederzuerkennen
+        self.old_recommendations_model.setStringList([el.split("/")[-1].split(".")[0].replace("-", " ") for el in olds])
+        self.new_recommendations_model.setStringList([el.split("/")[-1].split(".")[0].replace("-", " ") for el in news])
         self.old_view.setModel(self.old_recommendations_model)
         self.new_view.setModel(self.new_recommendations_model)
 
@@ -128,12 +130,8 @@ class RecommenderInterface(QMainWindow):
         olds = []
         news = []
         for recommendation in recommendations:
-            recipe_categories = recipe.get_categories_by_href(recommendation) #returns 000010010000
-            #print("recipe categories: ")
-            #print(recipe_categories)
+            recipe_categories = recipe.get_categories_by_href(recommendation)
             user_categories = self.new_user.get_category_indices()
-            #print("user categories: ")
-            #print(user_categories)
             if any(category in recipe_categories for category in user_categories):
                 print("adding old: ")
                 for element in recipe_categories:
@@ -141,10 +139,6 @@ class RecommenderInterface(QMainWindow):
                 olds.append(recommendation)
             else:
                 news.append(recommendation)
-        olds = [el.split("/")[-1].split(".")[0].replace("-", " ") for el in olds]
-
-        news = [el.split("/")[-1].split(".")[0].replace("-", " ") for el in news]
-
         return olds, news
 
     # TODO: csv-handling in eigens File auslagen?
