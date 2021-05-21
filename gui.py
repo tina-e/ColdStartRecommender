@@ -42,8 +42,8 @@ class RecommenderInterface(QMainWindow):
         num_current_stack = self.stacked_widget.currentIndex()
         # last page before switching to recommendation-page
         if name_current_stack == 'unwanted_page':
-            self.new_user.has_lactose_intolerance = (self.lactose_checkbox.checkState() == Qt.CheckState.Checked)
-            self.new_user.has_gluten_intolerance = (self.gluten_checkbox.checkState() == Qt.CheckState.Checked)
+            self.new_user.has_lactose_intolerance = (self.lactose_checkbox.checkState() == 2)
+            self.new_user.has_gluten_intolerance = (self.gluten_checkbox.checkState() == 2)
             # TODO: unwanted ingredients
             # self.new_user.unwanted_ingredients =
             self.stacked_widget.setCurrentIndex(num_current_stack + 1)
@@ -53,7 +53,7 @@ class RecommenderInterface(QMainWindow):
 
         # is on recommendation-page -> update recommendations
         elif name_current_stack == 'recommendations_page':
-            self.update_recommendations()
+            self.display_recommendations()
 
         # switch any other page
         elif self.is_valid_input(name_current_stack):
@@ -103,20 +103,24 @@ class RecommenderInterface(QMainWindow):
 
     def display_recommendations(self):
         self.next_button.setText("Loading Recommendations...")
-        self.new_user.pseudo_ratings = self.get_pseudo_ratings(self.new_user)
+        self.new_user.pseudo_ratings = recipe.get_pseudo_ratings(self.new_user)
 
         # calc recommendations
         self.system.add_user(self.new_user)
-        recommendations = self.system.recommend_items(self.new_user.name, 10)
+        recommendations = self.system.recommend_items(self.new_user.name, 20)
+
         print(recommendations)
 
         # display recommendations
         olds, news = self.split_recommendations(recommendations)
+        #self.old_recommendations_model.setStringList([el.split("/")[-1].split(".")[0].replace("-", " ") for el in olds])
+        #self.new_recommendations_model.setStringList([el.split("/")[-1].split(".")[0].replace("-", " ") for el in news])
         self.old_recommendations_model.setStringList(olds)
         self.new_recommendations_model.setStringList(news)
         self.old_view.setModel(self.old_recommendations_model)
         self.new_view.setModel(self.new_recommendations_model)
 
+        # TODO: prototypisch erlauben, vorgeschlagenes Rezept zu bewerten und die Recommendations updaten sich
         self.next_button.setText("Update Recommendations")
 
     def update_ratings(self):
@@ -127,60 +131,27 @@ class RecommenderInterface(QMainWindow):
         self.new_user.ratings[selected_item] = selected_rating
 
     def split_recommendations(self, recommendations):
+        recipe_types = ["desserts_overlap", "main_dish_overlap", "side_dish_overlap",
+                        "meat_and_poultry_overlap", "soups_stews_and_chili_overlap", "cakes_overlap",
+                        "breakfast_and_brunch_overlap", "salad_overlap", "pasta_and_noodels_overlap",
+                        "appetizers_and_snacks_overlap", "roasts_overlap", "casseroles_overlap",
+                        "low_calorie_overlap", "healthy_overlap", "veggie_overlap", "stir_fry_overlap",
+                        "asian_style_overlap", "pizza_overlap", "deep_fried_overlap", "italy_and_italian_style_overlap",
+                        "candy_overlap", "seafood_overlap", "cookies_overlap", "everyday_cooking_overlap",
+                        "dips_and_spreads_overlap", "drinks_overlap", "spirits_overlap"]
         olds = []
         news = []
         for recommendation in recommendations:
             recipe_categories = recipe.get_categories_by_href(recommendation)
             user_categories = self.new_user.get_category_indices()
             if any(category in recipe_categories for category in user_categories):
+                print("adding old: ")
+                for element in recipe_categories:
+                    print(recipe_types[element])
                 olds.append(recommendation)
             else:
                 news.append(recommendation)
         return olds, news
-
-
-    # TODO: csv-handling in eigens File auslagen?
-    def get_similar_users(self, list_of_categories):
-        return_users = []
-        user_file = open("./data/users.csv", encoding="utf-8")
-        for x in range(16187):  # 16187
-            line = user_file.readline()[0:-1].split(",")
-            if int(line[1]) in list_of_categories:
-                return_users.append(line[0])
-        return return_users
-
-    def get_recipes_from_users(self, similar_pref_users):
-        recipes = {}
-        user_file = open("./data/reviewsV2.csv", encoding="utf-8")
-        for x in range(7796004):  # 7796004
-            line = user_file.readline()[0:-1].split(",")
-            if line[0] in similar_pref_users:
-                recipes[line[1]] = 5
-        return recipes
-
-    def modify_pseudo_ratings(self, recipe_list, diff_price):
-        user_file = open("./data/difficulty_price.csv", encoding="utf-8")
-        for x in range(405863):  # 405863
-            line = user_file.readline()[0:-1].split(",")
-            if line[0] in recipe_list.keys():
-                if diff_price[0] != line[1]:  # modify if difficulty doesnt match - values leicht mittel schwer
-                    recipe_list[line[0]] = recipe_list[line[0]] - 1
-                if diff_price[1] != line[2]:  # modify if price category doesnt match - values 1 3 5
-                    recipe_list[line[0]] = recipe_list[line[0]] - 1
-        return recipe_list
-
-    def get_pseudo_ratings(self, user):
-        overlap_categories = user.get_category_indices()
-        diff_price = [user.level, user.budget]
-
-        similar_users = self.get_similar_users(overlap_categories)
-        print("number of similar users: " + str(len(similar_users)))
-        pseudo_ratings = self.get_recipes_from_users(similar_users)
-        print(pseudo_ratings)
-        pseudo_ratings = self.modify_pseudo_ratings(pseudo_ratings, diff_price)
-        print("ratings after modification: ")
-        print(pseudo_ratings)
-        return pseudo_ratings
 
 
 if __name__ == "__main__":
@@ -188,5 +159,3 @@ if __name__ == "__main__":
     window = RecommenderInterface()
     window.show()
     sys.exit(app.exec_())
-
-

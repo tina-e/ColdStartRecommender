@@ -14,7 +14,8 @@ class UserCF_Recommender:
     def fit_algorithm(self):
         # data = pandas.read_pickle("dataframe.pkl")
         data, self.data_info = DatasetPure.build_trainset(self.data)
-        self.user_cf = UserCF(task="rating", data_info=self.data_info)
+        # userCF is a "pure" model
+        self.user_cf = UserCF(task="rating", data_info=self.data_info, k=20, sim_type="cosine")
         self.user_cf.fit(data)
 
     # TODO: fix "unknown user"
@@ -33,8 +34,6 @@ class UserCF_Recommender:
 
     def recommend_items(self, user, num_of_recommendations):
         recommended_items = self.user_cf.recommend_user(user, num_of_recommendations)
-        #self.user_cf.
-        #if len(recommended_items) > 0:
         recommended_items = [self.data_info.id2item.get(reco[0]) for reco in recommended_items]
         return recommended_items
 
