@@ -2,6 +2,7 @@ import pandas
 from libreco.data import DatasetPure
 from libreco.algorithms import UserCF
 
+
 # ATTENTION: add in user_cf.py line 159: user = user_id
 
 class UserCF_Recommender:
@@ -14,7 +15,8 @@ class UserCF_Recommender:
     def fit_algorithm(self):
         # data = pandas.read_pickle("dataframe.pkl")
         data, self.data_info = DatasetPure.build_trainset(self.data)
-        self.user_cf = UserCF(task="rating", data_info=self.data_info)
+        # userCF is a "pure" model
+        self.user_cf = UserCF(task="rating", data_info=self.data_info, k=20, sim_type="cosine")
         self.user_cf.fit(data)
 
     # TODO: fix "unknown user"
@@ -27,28 +29,38 @@ class UserCF_Recommender:
             # user_df = user_df.append([user.name, recipe, rating], columns=["user", "item", "label"])
         user_df = pandas.DataFrame(user_data, columns=['user', 'item', 'label'])
         print(user_df)
-        self.data = self.data.append(user_df)
+        print("len before")
+        print(len(self.data))
+        half = int(user_df.size/6)
+        print("half: ")
+        print(half)
+        print("types: ")
+        print(type(user_df))
+        print(type(user_df.sample(half)))
+        self.data = self.data.append(user_df.sample(half))
+        #self.data = self.data.append(user_df)
+        print("len after")
+        print(len(self.data))
         self.fit_algorithm()
 
     def recommend_items(self, user, num_of_recommendations):
-        recommended_items = self.user_cf.recommend_user(user, num_of_recommendations)
+        print(user)
+        print(num_of_recommendations)
+        recommended_items = self.user_cf.recommend_user(user, num_of_recommendations)#(user=user, n_rec=num_of_recommendations)
+        print(recommended_items)
         recommended_items = [self.data_info.id2item.get(reco[0]) for reco in recommended_items]
+        print(recommended_items)
         return recommended_items
 
     # TODO: Delete unwanted recommendations (Allergien, ...)
     # def update_recommendations(self, unwanted_features):
 
+# k = 10
+# username_to_recommend_0 = "Angi54"
+# username_to_recommend_1 = "schmifi09"
+# username_to_recommend_2 = "Jacky65"
 
-#k = 10
-#username_to_recommend_0 = "Angi54"
-#username_to_recommend_1 = "schmifi09"
-#username_to_recommend_2 = "Jacky65"
-
-#system = UserCF_Recommender()
-#print(system.recommend_items(username_to_recommend_0, k))
-#print(system.recommend_items(username_to_recommend_1, k))
-#print(system.recommend_items(username_to_recommend_2, k))
-
-
-
-
+# system = UserCF_Recommender()
+# print(system.recommend_items(username_to_recommend_0, k))
+# print(system.recommend_items(username_to_recommend_1, k))
+# print(system.recommend_items(username_to_recommend_2, k))
