@@ -65,7 +65,7 @@
     <item row="1" column="0">
      <widget class="QStackedWidget" name="stacked_widget">
       <property name="currentIndex">
-       <number>7</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="start_page">
        <layout class="QVBoxLayout" name="verticalLayout_3">
