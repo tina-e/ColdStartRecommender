@@ -99,7 +99,7 @@ class RecommenderInterface(QMainWindow):
 
     def display_recommendations(self):
         self.next_button.setText("Loading Recommendations...")
-        self.new_user.pseudo_ratings = self.get_pseudo_ratings(self.new_user)
+        self.new_user.pseudo_ratings = recipe.get_pseudo_ratings(self.new_user)
 
         # calc recommendations
         self.system.add_user(self.new_user)
@@ -140,49 +140,6 @@ class RecommenderInterface(QMainWindow):
             else:
                 news.append(recommendation)
         return olds, news
-
-    # TODO: csv-handling in eigens File auslagen?
-    def get_similar_users(self, list_of_categories):
-        return_users = []
-        user_file = open("./data/users.csv", encoding="utf-8")
-        for x in range(16187):  # 16187
-            line = user_file.readline()[0:-1].split(",")
-            if int(line[1]) in list_of_categories:
-                return_users.append(line[0])
-        return return_users
-
-    def get_recipes_from_users(self, similar_pref_users):
-        recipes = {}
-        user_file = open("./data/reviewsV2.csv", encoding="utf-8")
-        for x in range(7796004):  # 7796004
-            line = user_file.readline()[0:-1].split(",")
-            if line[0] in similar_pref_users:
-                recipes[line[1]] = 5
-        return recipes
-
-    def modify_pseudo_ratings(self, recipe_list, diff_price):
-        user_file = open("./data/difficulty_price.csv", encoding="utf-8")
-        for x in range(405863):  # 405863
-            line = user_file.readline()[0:-1].split(",")
-            if line[0] in recipe_list.keys():
-                if diff_price[0] != line[1]:  # modify if difficulty doesnt match - values leicht mittel schwer
-                    recipe_list[line[0]] = recipe_list[line[0]] - 1
-                if diff_price[1] != line[2]:  # modify if price category doesnt match - values 1 3 5
-                    recipe_list[line[0]] = recipe_list[line[0]] - 1
-        return recipe_list
-
-    def get_pseudo_ratings(self, user):
-        overlap_categories = user.get_category_indices()
-        diff_price = [user.level, user.budget]
-
-        similar_users = self.get_similar_users(overlap_categories)
-        print("number of similar users: " + str(len(similar_users)))
-        pseudo_ratings = self.get_recipes_from_users(similar_users)
-        print(pseudo_ratings)
-        pseudo_ratings = self.modify_pseudo_ratings(pseudo_ratings, diff_price)
-        print("ratings after modification: ")
-        print(pseudo_ratings)
-        return pseudo_ratings
 
 
 if __name__ == "__main__":
