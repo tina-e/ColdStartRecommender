@@ -2,16 +2,16 @@ import sys
 import math
 
 from PyQt5 import uic, QtSvg, QtGui
-from PyQt5.QtCore import QRect, Qt, QStringListModel
+from PyQt5.QtCore import QRect, Qt, QStringListModel, QItemSelectionModel
 from PyQt5.Qt import QButtonGroup
 from PyQt5.QtWidgets import *
+import PyQt5
 
 from standard_recommender import UserCF_Recommender
 from user import User
 import recipe
 
 # TODO: Kategorien sinnvoll aufteilen
-# TODO: Länder-Page löschen
 # TODO: Auswahl für ungewollte Zutaten
 
 class RecommenderInterface(QMainWindow):
@@ -31,10 +31,10 @@ class RecommenderInterface(QMainWindow):
         for button in self.buttonGroup.buttons():
             button.clicked.connect(lambda _, b=button: self.on_type_clicked(b))
 
-        self.old_recommendations_model = QStringListModel()
-        self.new_recommendations_model = QStringListModel()
-        self.old_view.itemSelectionChanged.connect(self.update_ratings)
-        self.new_view.itemSelectionChanged.connect(self.update_ratings)
+        self.old_model = QtGui.QStandardItemModel()
+        self.new_model = QtGui.QStandardItemModel()
+        self.old_view.clicked.connect(self.on_old_rated)
+        self.new_view.clicked.connect(self.on_new_rated)
 
 
     def switch_to_next_stack(self):
@@ -49,6 +49,7 @@ class RecommenderInterface(QMainWindow):
             self.stacked_widget.setCurrentIndex(num_current_stack + 1)
             self.rating_combobox.show()
             self.label_instructions.setText("Zum Bewerten: Bewertung wählen und Rezept anklicken")
+            self.label_instructions.show()
             self.display_recommendations()
 
         # is on recommendation-page -> update recommendations
@@ -93,42 +94,53 @@ class RecommenderInterface(QMainWindow):
 
         # type selection pages
         elif 'category' in stack_name:
-            if not (0 < self.category_selected_counter <= self.max_category_selected_counter):
+            if not (0 <= self.category_selected_counter <= self.max_category_selected_counter):
                 self.label_error.setText(f"Wähle mind. 1 und max. {self.max_category_selected_counter} aus.")
                 return False
             self.category_selected_counter = 0
 
         return True
 
-
     def display_recommendations(self):
         self.next_button.setText("Loading Recommendations...")
-        self.new_user.pseudo_ratings = recipe.get_pseudo_ratings(self.new_user)
+        self.old_model.clear()
+        self.new_model.clear()
 
-        # calc recommendations
+        self.new_user.pseudo_ratings = recipe.get_pseudo_ratings(self.new_user)
         self.system.add_user(self.new_user)
         recommendations = self.system.recommend_items(self.new_user.name, 20)
-
         print(recommendations)
 
         # display recommendations
         olds, news = self.split_recommendations(recommendations)
-        #self.old_recommendations_model.setStringList([el.split("/")[-1].split(".")[0].replace("-", " ") for el in olds])
-        #self.new_recommendations_model.setStringList([el.split("/")[-1].split(".")[0].replace("-", " ") for el in news])
-        self.old_recommendations_model.setStringList(olds)
-        self.new_recommendations_model.setStringList(news)
-        self.old_view.setModel(self.old_recommendations_model)
-        self.new_view.setModel(self.new_recommendations_model)
+        for rec in olds:
+            item = QtGui.QStandardItem(rec)
+            item.setSelectable(True)
+            self.old_model.appendRow(item)
+        for rec in news:
+            item = QtGui.QStandardItem(rec)
+            item.setSelectable(True)
+            self.new_model.appendRow(item)
+        self.old_view.setModel(self.old_model)
+        self.new_view.setModel(self.new_model)
 
-        # TODO: prototypisch erlauben, vorgeschlagenes Rezept zu bewerten und die Recommendations updaten sich
         self.next_button.setText("Update Recommendations")
 
-    def update_ratings(self):
-        view = self.old_view.selectedItems()
-        if len(self.new_view.selectedItems()) != 0: view = self.new_view.selectedItems()
-        selected_item = view.selectedItems()
+
+    def on_old_rated(self, index):
+        item_view = self.old_model.item(index.row())
+        item_view.setBackground(QtGui.QColor('yellow'))
+        rated_item = item_view.text()
         selected_rating = self.rating_combobox.currentText().split(" ")[0]
-        self.new_user.ratings[selected_item] = selected_rating
+        self.new_user.ratings_to_add_to_df[rated_item] = int(selected_rating)
+
+    def on_new_rated(self, index):
+        item_view = self.new_model.item(index.row())
+        item_view.setBackground(QtGui.QColor('yellow'))
+        rated_item = item_view.text()
+        selected_rating = self.rating_combobox.currentText().split(" ")[0]
+        self.new_user.ratings_to_add_to_df[rated_item] = int(selected_rating)
+
 
     def split_recommendations(self, recommendations):
         recipe_types = ["desserts_overlap", "main_dish_overlap", "side_dish_overlap",
