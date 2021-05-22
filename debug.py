@@ -1,5 +1,6 @@
 from user import User
 from standard_recommender import UserCF_Recommender
+import random
 
 def modify_pseudo_ratings(recipe_list, diff_price):
     user_file = open("./data/difficulty_price.csv", encoding="utf-8")
@@ -30,11 +31,11 @@ def get_recipes_from_users(similar_pref_users):
             recipes[line[1]] = 5
     return recipes
 
-def get_pseudo_ratings(user):
+def get_pseudo_ratings(user, max_index):
     overlap_categories = user.get_category_indices()
     diff_price = [user.level, user.budget]
 
-    similar_users = get_similar_users(overlap_categories)
+    similar_users = get_similar_users(overlap_categories)[:max_index]
     print("number of similar users: " + str(len(similar_users)))
     pseudo_ratings = get_recipes_from_users(similar_users)
     print(pseudo_ratings)
@@ -58,14 +59,30 @@ recipe_types = ["desserts_overlap", "side_dish_overlap",
 
 problematics = ["dips_and_spreads_overlap", "pizza_overlap", "low_calorie_overlap", "roasts_overlap", "pasta_and_noodels_overlap", "appetizers_and_snacks_overlap"]
 
-for overlap in recipe_types:
-    system = UserCF_Recommender()
-    user.category_list = [overlap]
-    user.pseudo_ratings = get_pseudo_ratings(user)
-    system.add_user(user)
-    recommendations = system.recommend_items(user.name, 10)
-    print(f"recommendations for {overlap}")
-    print(recommendations)
+#for overlap in problematics[-1]:
 
-print(problematics)
-print("fin")
+overlap = "dips_and_spreads_overlap"
+system = UserCF_Recommender()
+user.category_list = [overlap]
+
+all_pseudo_ratings = get_pseudo_ratings(user, -1) #instead of -1 take number
+
+
+#80 - 2 returns
+#70 - 2
+#40 - 2 ['/rezept/13005/Suppen-Zucchini-Curry-Suppe.html', '/rezept/4981/Afrikanischer-Eintopf-angolan-Art.html']
+#20 - 2 dieselben wie bei 40, dann weitere
+
+
+print(len(all_pseudo_ratings)) #573 with 0:96 usern   # 559 mit 91 usern
+#all_pseudo_ratings = dict(list(all_pseudo_ratings.items())[len(all_pseudo_ratings)//2:])
+#all_pseudo_ratings =
+#print(len(all_pseudo_ratings))
+user.pseudo_ratings = all_pseudo_ratings
+
+system.add_user(user)
+#recommendations = system.recommend_items(user.name, 20)
+recommendations = system.recommend_items("Baumblatt", 20)
+print(len(recommendations))
+#print(f"recommendations for {overlap}")
+print(recommendations)
