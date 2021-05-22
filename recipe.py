@@ -65,8 +65,8 @@ def get_pseudo_ratings(user):
     similar_users = get_similar_users(overlap_categories)
     print("number of similar users: " + str(len(similar_users)))
     pseudo_ratings = get_recipes_from_users(similar_users)
-    print(pseudo_ratings)
+    #print(pseudo_ratings)
     pseudo_ratings = modify_pseudo_ratings(pseudo_ratings, diff_price)
     print("ratings after modification: ")
-    print(pseudo_ratings)
+    #print(pseudo_ratings)
     return pseudo_ratings

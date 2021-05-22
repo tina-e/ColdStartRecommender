@@ -8,7 +8,7 @@ class User:
         self.has_lactose_intolerance = False
         self.has_gluten_intolerance = False
         self.pseudo_ratings = {}
-        self.ratings = {}
+        self.ratings_to_add_to_df = {}
 
     def get_category_indices(self):
         indices = []
