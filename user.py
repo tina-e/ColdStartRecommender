@@ -23,3 +23,6 @@ class User:
         for category in self.category_list:
             indices.append(recipe_types.index(category))
         return indices
+
+    def get_dislikes(self):
+        return [self.has_lactose_intolerance, self.has_gluten_intolerance, self.unwanted_ingredients]

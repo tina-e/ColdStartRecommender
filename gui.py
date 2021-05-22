@@ -109,7 +109,7 @@ class RecommenderInterface(QMainWindow):
         self.new_user.pseudo_ratings = recipe.get_pseudo_ratings(self.new_user)
         self.system.add_user(self.new_user)
         recommendations = self.system.recommend_items(self.new_user.name, 20)
-        print(recommendations)
+        recommendations = recipe.modify_recommendations(recommendations, self.new_user.get_dislikes())
 
         # display recommendations
         olds, news = self.split_recommendations(recommendations)
