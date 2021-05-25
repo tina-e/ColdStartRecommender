@@ -11,8 +11,6 @@ from standard_recommender import UserCF_Recommender
 from user import User
 import recipe
 
-# TODO: Kategorien sinnvoll aufteilen
-# TODO: Auswahl für ungewollte Zutaten
 
 class RecommenderInterface(QMainWindow):
     def __init__(self):
@@ -20,6 +18,7 @@ class RecommenderInterface(QMainWindow):
         QMainWindow.__init__(self)
         uic.loadUi("recsys.ui", self)
         self.rating_combobox.hide()
+        self.search_field_prototype.hide()
 
         self.category_selected_counter = 0
         self.max_category_selected_counter = 2
@@ -31,11 +30,11 @@ class RecommenderInterface(QMainWindow):
         for button in self.buttonGroup.buttons():
             button.clicked.connect(lambda _, b=button: self.on_type_clicked(b))
 
+        self.rec_display_dict = {}
         self.old_model = QtGui.QStandardItemModel()
         self.new_model = QtGui.QStandardItemModel()
         self.old_view.clicked.connect(self.on_old_rated)
         self.new_view.clicked.connect(self.on_new_rated)
-
 
     def switch_to_next_stack(self):
         name_current_stack = self.stacked_widget.currentWidget().objectName()
@@ -44,10 +43,9 @@ class RecommenderInterface(QMainWindow):
         if name_current_stack == 'unwanted_page':
             self.new_user.has_lactose_intolerance = (self.lactose_checkbox.checkState() == 2)
             self.new_user.has_gluten_intolerance = (self.gluten_checkbox.checkState() == 2)
-            # TODO: unwanted ingredients
-            # self.new_user.unwanted_ingredients =
             self.stacked_widget.setCurrentIndex(num_current_stack + 1)
             self.rating_combobox.show()
+            self.search_field_prototype.show()
             self.label_instructions.setText("Zum Bewerten: Bewertung wählen und Rezept anklicken")
             self.label_instructions.show()
             self.display_recommendations()
@@ -59,30 +57,30 @@ class RecommenderInterface(QMainWindow):
         # switch any other page
         elif self.is_valid_input(name_current_stack):
             if name_current_stack == 'start_page':
-                self.label_instructions.setText(f"Wähle bis zu {self.max_category_selected_counter} Kategorien, die dir am meisten zusagen.")
-            elif name_current_stack == 'category_page_4':
+                self.label_instructions.setText(f"Wähle bis zu {self.max_category_selected_counter} Kategorien, die dir zusagen.")
+            elif name_current_stack == 'category_page_2':
                 self.label_instructions.hide()
             self.label_error.setText("")
+            self.category_selected_counter = 0
             self.stacked_widget.setCurrentIndex(num_current_stack + 1)
 
-
     def on_type_clicked(self, clicked_button):
-        clicked_type = clicked_button.objectName()
-        if clicked_type in self.new_user.category_list:
-            self.new_user.category_list.remove(clicked_type)
-            clicked_button.setStyleSheet('')
-            self.category_selected_counter = self.category_selected_counter - 1
-        elif self.category_selected_counter < self.max_category_selected_counter:
-            self.new_user.category_list.append(clicked_type)
-            clicked_button.setStyleSheet('background-color: blue;')
-            self.category_selected_counter = self.category_selected_counter + 1
-
+        clicked_types = clicked_button.objectName().split('0')
+        for clicked_type in clicked_types:
+            if clicked_type in self.new_user.category_list:
+                self.new_user.category_list.remove(clicked_type)
+                clicked_button.setStyleSheet('')
+                self.category_selected_counter = self.category_selected_counter - 1
+            elif self.category_selected_counter < self.max_category_selected_counter:
+                self.new_user.category_list.append(clicked_type)
+                clicked_button.setStyleSheet('background-color: lightblue;')
+                self.category_selected_counter = self.category_selected_counter + 1
 
     def is_valid_input(self, stack_name):
         # start page
         if stack_name == 'start_page':
             if not self.input_username.text().strip() or not self.input_budget or not self.input_level:
-                self.label_error.setText("Nicht alle Felder ausgefüllt.")
+                self.label_error.setText("Bitte fülle alle Felder aus.")
                 return False
             if self.input_username.text() in self.system.user_list:
                 self.label_error.setText("Username belegt.")
@@ -91,18 +89,12 @@ class RecommenderInterface(QMainWindow):
             elif self.input_budget.currentText() == 'mittleres Budget': budget = 3
             elif self.input_budget.currentText() == 'höheres Budget': budget = 5
             self.new_user = User(self.input_username.text(), self.input_level.currentText(), budget)
-
-        # type selection pages
-        elif 'category' in stack_name:
-            if not (0 <= self.category_selected_counter <= self.max_category_selected_counter):
-                self.label_error.setText(f"Wähle mind. 1 und max. {self.max_category_selected_counter} aus.")
-                return False
-            self.category_selected_counter = 0
-
         return True
 
     def display_recommendations(self):
-        self.next_button.setText("Loading Recommendations...")
+        print(self.new_user.category_list)
+
+        self.next_button.setText("Vorschläge werden geladen...")
         self.old_model.clear()
         self.new_model.clear()
 
@@ -111,59 +103,38 @@ class RecommenderInterface(QMainWindow):
         recommendations = self.system.recommend_items(self.new_user.name, 35)
         recommendations = recipe.modify_recommendations(recommendations, self.new_user.get_dislikes())
 
-        # display recommendations
-        olds, news = self.split_recommendations(recommendations)
-        for rec in olds:
-            item = QtGui.QStandardItem(rec)
+        for recommendation in recommendations:
+            model_params = (self.old_model, "o") if self.is_old(recommendation) else (self.new_model, "n")
+            index = len(model_params[0].findItems("", flags=Qt.MatchContains))
+            self.rec_display_dict[(model_params[1], index)] = recommendation
+            rec_string = recommendation.split("/")[-1].split(".")[0].replace("-", " ")
+            item = QtGui.QStandardItem(rec_string)
             item.setSelectable(True)
-            self.old_model.appendRow(item)
-        for rec in news:
-            item = QtGui.QStandardItem(rec)
-            item.setSelectable(True)
-            self.new_model.appendRow(item)
+            model_params[0].appendRow(item)
+
         self.old_view.setModel(self.old_model)
         self.new_view.setModel(self.new_model)
-
-        self.next_button.setText("Update Recommendations")
-
+        self.next_button.setText("Vorschläge neu laden")
 
     def on_old_rated(self, index):
+        print(self.rec_display_dict)
         item_view = self.old_model.item(index.row())
         item_view.setBackground(QtGui.QColor('yellow'))
-        rated_item = item_view.text()
+        rated_item = self.rec_display_dict.get(('o', index.row()))
         selected_rating = self.rating_combobox.currentText().split(" ")[0]
         self.new_user.ratings_to_add_to_df[rated_item] = int(selected_rating)
 
     def on_new_rated(self, index):
         item_view = self.new_model.item(index.row())
         item_view.setBackground(QtGui.QColor('yellow'))
-        rated_item = item_view.text()
+        rated_item = self.rec_display_dict.get(('n', index.row()))
         selected_rating = self.rating_combobox.currentText().split(" ")[0]
         self.new_user.ratings_to_add_to_df[rated_item] = int(selected_rating)
 
-
-    def split_recommendations(self, recommendations):
-        recipe_types = ["desserts_overlap", "main_dish_overlap", "side_dish_overlap",
-                        "meat_and_poultry_overlap", "soups_stews_and_chili_overlap", "cakes_overlap",
-                        "breakfast_and_brunch_overlap", "salad_overlap", "pasta_and_noodels_overlap",
-                        "appetizers_and_snacks_overlap", "roasts_overlap", "casseroles_overlap",
-                        "low_calorie_overlap", "healthy_overlap", "veggie_overlap", "stir_fry_overlap",
-                        "asian_style_overlap", "pizza_overlap", "deep_fried_overlap", "italy_and_italian_style_overlap",
-                        "candy_overlap", "seafood_overlap", "cookies_overlap", "everyday_cooking_overlap",
-                        "dips_and_spreads_overlap", "drinks_overlap", "spirits_overlap"]
-        olds = []
-        news = []
-        for recommendation in recommendations:
-            recipe_categories = recipe.get_categories_by_href(recommendation)
-            user_categories = self.new_user.get_category_indices()
-            if any(category in recipe_categories for category in user_categories):
-                print("adding old: ")
-                for element in recipe_categories:
-                    print(recipe_types[element])
-                olds.append(recommendation)
-            else:
-                news.append(recommendation)
-        return olds, news
+    def is_old(self, recommendation):
+        recipe_categories = recipe.get_categories_by_href(recommendation)
+        user_categories = self.new_user.get_category_indices()
+        return any(category in recipe_categories for category in user_categories)
 
 
 if __name__ == "__main__":

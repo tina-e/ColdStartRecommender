@@ -16,7 +16,6 @@ class UserCF_Recommender:
         self.user_cf = UserCF(task="rating", data_info=self.data_info, k=20, sim_type="cosine")
         self.user_cf.fit(data)
 
-    # TODO: fix "unknown user"
     def add_user(self, user):
         if len(user.ratings_to_add_to_df) == 0:
             ratings_to_add = user.pseudo_ratings
@@ -27,7 +26,7 @@ class UserCF_Recommender:
             user_data.append([user.name, recipe, rating])
         user_df = pandas.DataFrame(user_data, columns=['user', 'item', 'label'])
         print(user_df)
-        self.data = self.data.append(user_df.sample(user_df.size/6))
+        self.data = self.data.append(user_df.sample(int(user_df.size/6)))
         user.ratings_to_add_to_df.clear() # reset not-yet-added ratings
         self.fit_algorithm()
 
