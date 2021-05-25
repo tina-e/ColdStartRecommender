@@ -7,8 +7,6 @@ from libreco.algorithms import UserCF
 class UserCF_Recommender:
     def __init__(self):
         self.data = pandas.read_csv("data/reviewsV2.csv", sep=",", names=["user", "item", "label"])
-        # self.data.to_pickle("dataframe.pkl")
-        # self.fit_algorithm()
         self.user_list = self.data['user'].tolist()
 
     def fit_algorithm(self):
@@ -27,10 +25,9 @@ class UserCF_Recommender:
         user_data = []
         for recipe, rating in ratings_to_add.items():
             user_data.append([user.name, recipe, rating])
-            # user_df = user_df.append([user.name, recipe, rating], columns=["user", "item", "label"])
         user_df = pandas.DataFrame(user_data, columns=['user', 'item', 'label'])
         print(user_df)
-        self.data = self.data.append(user_df)
+        self.data = self.data.append(user_df.sample(user_df.size/6))
         user.ratings_to_add_to_df.clear() # reset not-yet-added ratings
         self.fit_algorithm()
 
@@ -38,21 +35,6 @@ class UserCF_Recommender:
         recommended_items = self.user_cf.recommend_user(user, num_of_recommendations)
         recommended_items = [self.data_info.id2item.get(reco[0]) for reco in recommended_items]
         return recommended_items
-
-    # TODO: Delete unwanted recommendations (Allergien, ...)
-    # def update_recommendations(self, unwanted_features):
-
-
-#k = 10
-#username_to_recommend_0 = "Angi54"
-#username_to_recommend_1 = "schmifi09"
-#username_to_recommend_2 = "Jacky65"
-
-#system = UserCF_Recommender()
-#print(system.recommend_items(username_to_recommend_0, k))
-#print(system.recommend_items(username_to_recommend_1, k))
-#print(system.recommend_items(username_to_recommend_2, k))
-
 
 
 
