@@ -1,9 +1,9 @@
 import sys
-import math
-
+import concurrent.futures
+from threading import Thread
 
 from PyQt5 import uic, QtSvg, QtGui
-from PyQt5.QtCore import QRect, Qt, QStringListModel, QItemSelectionModel
+from PyQt5.QtCore import QRect, Qt, QStringListModel, QItemSelectionModel, QThread, QCoreApplication
 from PyQt5.Qt import QButtonGroup
 from PyQt5.QtWidgets import *
 import PyQt5
@@ -47,15 +47,19 @@ class RecommenderInterface(QMainWindow):
             self.new_user.has_lactose_intolerance = (self.lactose_checkbox.checkState() == 2)
             self.new_user.has_gluten_intolerance = (self.gluten_checkbox.checkState() == 2)
             self.stacked_widget.setCurrentIndex(num_current_stack + 1)
+            self.next_button.setText("Vorschläge werden geladen...")
             self.rating_combobox.show()
-            self.search_field_prototype.show()
-            self.label_instructions.setText("Zum Bewerten: Bewertung wählen und Rezept anklicken")
             self.label_instructions.show()
-            self.display_recommendations()
+            self.search_field_prototype.show()
+            self.label_instructions.setText("Zum Bewerten: Bewertung wählen und Rezept(e) anklicken")
+            QCoreApplication.processEvents()
+            self.display_recommendations(self.calc_recommendations())
 
         # is on recommendation-page -> update recommendations
         elif name_current_stack == 'recommendations_page':
-            self.display_recommendations()
+            self.next_button.setText("Vorschläge werden geladen...")
+            QCoreApplication.processEvents()
+            self.display_recommendations(self.calc_recommendations())
 
         # switch any other page
         elif self.is_valid_input(name_current_stack):
@@ -94,18 +98,18 @@ class RecommenderInterface(QMainWindow):
             self.new_user = User(self.input_username.text(), self.input_level.currentText(), budget)
         return True
 
-    def display_recommendations(self):
+    def calc_recommendations(self):
         print("user has selected the following categories: " + str(self.new_user.category_list))
-
-        self.next_button.setText("Vorschläge werden geladen...")
-        self.old_model.clear()
-        self.new_model.clear()
-
         if len(self.new_user.pseudo_ratings) == 0:
             self.new_user.pseudo_ratings = recipe.get_pseudo_ratings(self.new_user)
         self.system.add_user(self.new_user, self.num_recommendations)
-        recommendations = self.system.recommend_items(self.new_user.name, self.num_recommendations)
+        recommendations = self.system.recommend_items(self.new_user.name, 35)
         recommendations = recipe.modify_recommendations(recommendations, self.new_user.get_dislikes())
+        return recommendations
+
+    def display_recommendations(self, recommendations):
+        self.old_model.clear()
+        self.new_model.clear()
 
         for recommendation in recommendations:
             model_params = (self.old_model, "o") if self.is_old(recommendation) else (self.new_model, "n")
@@ -121,7 +125,6 @@ class RecommenderInterface(QMainWindow):
         self.next_button.setText("Vorschläge neu laden")
 
     def on_old_rated(self, index):
-        print(self.rec_display_dict)
         item_view = self.old_model.item(index.row())
         item_view.setBackground(QtGui.QColor('yellow'))
         rated_item = self.rec_display_dict.get(('o', index.row()))

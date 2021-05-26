@@ -58,7 +58,7 @@ class UserCfRecommender:
         ret = pandas.read_csv("data/reviews.csv", sep=",", names=["user", "item", "label"])
         print("--- %s seconds ---" % (time.time() - start_time))
         return ret
-        #return pandas.read_csv("data/reviewsV2.csv", sep=",", names=["user", "item", "label"])
+        #return pandas.read_csv("data/reviews.csv", sep=",", names=["user", "item", "label"])
 
     def list_to_dataframe(self, list_of_ratings, username):
         user_data = []
