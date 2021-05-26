@@ -1,20 +1,21 @@
 import sys
 import math
 
+
 from PyQt5 import uic, QtSvg, QtGui
 from PyQt5.QtCore import QRect, Qt, QStringListModel, QItemSelectionModel
 from PyQt5.Qt import QButtonGroup
 from PyQt5.QtWidgets import *
 import PyQt5
 
-from standard_recommender import UserCF_Recommender
+from standard_recommender import UserCfRecommender
 from user import User
 import recipe
 
 
 class RecommenderInterface(QMainWindow):
     def __init__(self):
-        self.system = UserCF_Recommender()
+        self.system = UserCfRecommender()
         QMainWindow.__init__(self)
         uic.loadUi("recsys.ui", self)
         self.rating_combobox.hide()
@@ -35,6 +36,8 @@ class RecommenderInterface(QMainWindow):
         self.new_model = QtGui.QStandardItemModel()
         self.old_view.clicked.connect(self.on_old_rated)
         self.new_view.clicked.connect(self.on_new_rated)
+
+        self.num_recommendations = 30
 
     def switch_to_next_stack(self):
         name_current_stack = self.stacked_widget.currentWidget().objectName()
@@ -92,15 +95,16 @@ class RecommenderInterface(QMainWindow):
         return True
 
     def display_recommendations(self):
-        print(self.new_user.category_list)
+        print("user has selected the following categories: " + str(self.new_user.category_list))
 
         self.next_button.setText("Vorschläge werden geladen...")
         self.old_model.clear()
         self.new_model.clear()
 
-        self.new_user.pseudo_ratings = recipe.get_pseudo_ratings(self.new_user)
-        self.system.add_user(self.new_user)
-        recommendations = self.system.recommend_items(self.new_user.name, 35)
+        if len(self.new_user.pseudo_ratings) == 0:
+            self.new_user.pseudo_ratings = recipe.get_pseudo_ratings(self.new_user)
+        self.system.add_user(self.new_user, self.num_recommendations)
+        recommendations = self.system.recommend_items(self.new_user.name, self.num_recommendations)
         recommendations = recipe.modify_recommendations(recommendations, self.new_user.get_dislikes())
 
         for recommendation in recommendations:
@@ -123,6 +127,8 @@ class RecommenderInterface(QMainWindow):
         rated_item = self.rec_display_dict.get(('o', index.row()))
         selected_rating = self.rating_combobox.currentText().split(" ")[0]
         self.new_user.ratings_to_add_to_df[rated_item] = int(selected_rating)
+        print("added: ")
+        print(self.new_user.ratings_to_add_to_df[rated_item])
 
     def on_new_rated(self, index):
         item_view = self.new_model.item(index.row())
@@ -130,6 +136,8 @@ class RecommenderInterface(QMainWindow):
         rated_item = self.rec_display_dict.get(('n', index.row()))
         selected_rating = self.rating_combobox.currentText().split(" ")[0]
         self.new_user.ratings_to_add_to_df[rated_item] = int(selected_rating)
+        print("added: ")
+        print(self.new_user.ratings_to_add_to_df[rated_item])
 
     def is_old(self, recommendation):
         recipe_categories = recipe.get_categories_by_href(recommendation)

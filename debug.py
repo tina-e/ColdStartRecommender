@@ -1,5 +1,5 @@
 from user import User
-from standard_recommender import UserCF_Recommender
+from standard_recommender import UserCfRecommender
 import random
 
 def modify_pseudo_ratings(recipe_list, diff_price):
@@ -62,7 +62,7 @@ problematics = ["dips_and_spreads_overlap", "pizza_overlap", "low_calorie_overla
 #for overlap in problematics[-1]:
 
 overlap = "dips_and_spreads_overlap"
-system = UserCF_Recommender()
+system = UserCfRecommender()
 user.category_list = [overlap]
 
 all_pseudo_ratings = get_pseudo_ratings(user, -1) #instead of -1 take number

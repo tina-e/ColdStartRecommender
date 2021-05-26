@@ -59,7 +59,7 @@ def get_pseudo_ratings(user):
     overlap_categories = user.get_category_indices()
     diff_price = [user.level, user.budget]
     similar_users = get_similar_users(overlap_categories)
-    print("number of similar users: " + str(len(similar_users)))
+    print("number of similar users who have mainly rated one of these categories: " + str(len(similar_users)))
     pseudo_ratings = get_recipes_from_users(similar_users)
     pseudo_ratings = modify_pseudo_ratings(pseudo_ratings, diff_price)
     return pseudo_ratings
@@ -70,7 +70,8 @@ def modify_recommendations(recommendations, user_dislikes):
     # recommendations: array an strings
     if user_dislikes[0] == False and user_dislikes[1] == False and len(
             user_dislikes[2]) == 0:  # skip if there are no restrictions
-        print("Skipped filtering of recommendations because there are no limitations")
+        print("Skipped filtering of recommendations because there are no limitations because of intolerance")
+        print("Returning " + str(len(recommendations))+" recommendations")
         return recommendations
     recipes_file = open("./data/recipes.csv", encoding="utf-8")
     final_recommendations = []
@@ -79,4 +80,5 @@ def modify_recommendations(recommendations, user_dislikes):
         if row[0] in recommendations:  # if one recipe has been found
             if not (user_dislikes[0] == int(row[88]) or user_dislikes[1] == int(row[84])):
                 final_recommendations.append(row[0])
+    print("Returning " + str(len(final_recommendations)) + " recommendations")
     return final_recommendations
