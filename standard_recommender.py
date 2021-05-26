@@ -12,7 +12,6 @@ class UserCfRecommender:
         self.user_list = self.data['user'].tolist()
 
     def fit_algorithm(self, num_recommendations):
-        # data = pandas.read_pickle("dataframe.pkl")
         data, self.data_info = DatasetPure.build_trainset(self.data)
         # userCF is a "pure" model
         self.user_cf = UserCF(task="rating", data_info=self.data_info, k=num_recommendations, sim_type="cosine")
@@ -23,7 +22,7 @@ class UserCfRecommender:
             ratings_to_add = user.pseudo_ratings
             user_df = self.list_to_dataframe(ratings_to_add, user.name)
             print("Using " + str(int(user_df.size / 6)) + " pseudo ratings for standard recommender")
-            self.data = self.data.append(user_df.sample(int(user_df.size / 6)))
+            self.data = self.get_ratings_from_file().append(user_df.sample(int(user_df.size / 6))).append(self.list_to_dataframe(user.ratings_to_add_to_df, user.name))
             self.fit_algorithm(num_recommendations)
         else:
             ratings_to_add = user.ratings_to_add_to_df
@@ -54,11 +53,7 @@ class UserCfRecommender:
         return recommended_items
 
     def get_ratings_from_file(self):
-        start_time = time.time()
-        ret = pandas.read_csv("data/reviews.csv", sep=",", names=["user", "item", "label"])
-        print("--- %s seconds ---" % (time.time() - start_time))
-        return ret
-        #return pandas.read_csv("data/reviews.csv", sep=",", names=["user", "item", "label"])
+        return pandas.read_csv("data/reviews.csv", sep=",", names=["user", "item", "label"])
 
     def list_to_dataframe(self, list_of_ratings, username):
         user_data = []
