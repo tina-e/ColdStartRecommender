@@ -55,7 +55,7 @@ class UserCfRecommender:
 
     def get_ratings_from_file(self):
         start_time = time.time()
-        ret = pandas.read_csv("data/reviewsV2.csv", sep=",", names=["user", "item", "label"])
+        ret = pandas.read_csv("data/reviews.csv", sep=",", names=["user", "item", "label"])
         print("--- %s seconds ---" % (time.time() - start_time))
         return ret
         #return pandas.read_csv("data/reviewsV2.csv", sep=",", names=["user", "item", "label"])

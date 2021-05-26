@@ -24,7 +24,7 @@ def get_similar_users(list_of_categories):
 
 def get_recipes_from_users(similar_pref_users):
     recipes = {}
-    user_file = open("./data/reviewsV2.csv", encoding="utf-8")
+    user_file = open("./data/reviews.csv", encoding="utf-8")
     for x in range(7796004):  # 7796004
         line = user_file.readline()[0:-1].split(",")
         if line[0] in similar_pref_users:
