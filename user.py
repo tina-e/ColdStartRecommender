@@ -1,5 +1,5 @@
 class User:
-    def __init__(self, name, level, budget):
+    def __init__(self, name, budget, level):
         self.name = name
         self.level = level
         self.budget = budget

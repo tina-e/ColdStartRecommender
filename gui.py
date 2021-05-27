@@ -92,10 +92,14 @@ class RecommenderInterface(QMainWindow):
             if self.input_username.text() in self.system.user_list:
                 self.label_error.setText("Username belegt.")
                 return False
+
+            level = ""
+            budget = ""
             if self.input_budget.currentText() == 'kleines Budget': budget = 1
             elif self.input_budget.currentText() == 'mittleres Budget': budget = 3
             elif self.input_budget.currentText() == 'höheres Budget': budget = 5
-            self.new_user = User(self.input_username.text(), self.input_level.currentText(), budget)
+            if self.input_level.currentText() != 'keine Präferenz': level = self.input_level.currentText()
+            self.new_user = User(self.input_username.text(), budget, level)
         return True
 
     def calc_recommendations(self):

@@ -48,9 +48,9 @@ def modify_pseudo_ratings(recipe_list, diff_price):
     for x in range(405863):  # 405863
         line = user_file.readline()[0:-1].split(",")
         if line[0] in recipe_list.keys():
-            if diff_price[0] != line[1]:  # modify if difficulty doesnt match - values leicht mittel schwer
+            if diff_price[0] != "" and diff_price[0] != line[1]:  # modify if difficulty doesnt match - values leicht mittel schwer
                 recipe_list[line[0]] = recipe_list[line[0]] - 1
-            if diff_price[1] != line[2]:  # modify if price category doesnt match - values 1 3 5
+            if diff_price[1] != "" and diff_price[1] != line[2]:  # modify if price category doesnt match - values 1 3 5
                 recipe_list[line[0]] = recipe_list[line[0]] - 1
     return recipe_list
 
