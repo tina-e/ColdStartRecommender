@@ -26,3 +26,6 @@ class User:
 
     def get_dislikes(self):
         return [self.has_lactose_intolerance, self.has_gluten_intolerance, self.unwanted_ingredients]
+
+    def has_chosen_categories(self):
+        return len(self.category_list) != 0

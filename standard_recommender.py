@@ -48,8 +48,11 @@ class UserCfRecommender:
         #self.fit_algorithm(num_recommendations)
 
     def recommend_items(self, user, num_of_recommendations):
-        recommended_items = self.user_cf.recommend_user(user, num_of_recommendations)
-        recommended_items = [self.data_info.id2item.get(reco[0]) for reco in recommended_items]
+        if not user.has_chosen_categories() and len(user.ratings_to_add_to_df) == 0:
+            recommended_items = self.user_cf.data_info.popular_items[:num_of_recommendations]
+        else:
+            recommended_items = self.user_cf.recommend_user(user.name, num_of_recommendations)
+            recommended_items = [self.data_info.id2item.get(reco[0]) for reco in recommended_items]
         return recommended_items
 
     def get_ratings_from_file(self):

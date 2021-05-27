@@ -103,11 +103,10 @@ class RecommenderInterface(QMainWindow):
         return True
 
     def calc_recommendations(self):
-        print("user has selected the following categories: " + str(self.new_user.category_list))
         if len(self.new_user.pseudo_ratings) == 0:
             self.new_user.pseudo_ratings = recipe.get_pseudo_ratings(self.new_user)
         self.system.add_user(self.new_user, self.num_recommendations)
-        recommendations = self.system.recommend_items(self.new_user.name, 35)
+        recommendations = self.system.recommend_items(self.new_user, 35)
         recommendations = recipe.modify_recommendations(recommendations, self.new_user.get_dislikes())
         return recommendations
 
@@ -116,7 +115,10 @@ class RecommenderInterface(QMainWindow):
         self.new_model.clear()
 
         for recommendation in recommendations:
-            model_params = (self.old_model, "o") if self.is_old(recommendation) else (self.new_model, "n")
+            if not self.new_user.has_chosen_categories() and len(self.new_user.ratings_to_add_to_df) == 0:
+                model_params = self.old_model, "o"
+            else:
+                model_params = (self.old_model, "o") if self.is_old(recommendation) else (self.new_model, "n")
             index = len(model_params[0].findItems("", flags=Qt.MatchContains))
             self.rec_display_dict[(model_params[1], index)] = recommendation
             rec_string = recommendation.split("/")[-1].split(".")[0].replace("-", " ")
