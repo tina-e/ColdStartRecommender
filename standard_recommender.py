@@ -13,7 +13,7 @@ class UserCfRecommender:
 
     def fit_algorithm(self, num_recommendations):
         data, self.data_info = DatasetPure.build_trainset(self.data)
-        # userCF is a "pure" model
+        # userCF is a "pure" model according to the library
         self.user_cf = UserCF(task="rating", data_info=self.data_info, k=num_recommendations, sim_type="cosine")
         self.user_cf.fit(data)
 
@@ -28,24 +28,8 @@ class UserCfRecommender:
             ratings_to_add = user.ratings_to_add_to_df
             user_df = self.list_to_dataframe(ratings_to_add, user.name)
             print("using real ratings for standard recommender")
-            self.data = self.get_ratings_from_file().append(user_df) #reload 7 mio ratings (means removal of pseudo ratings
+            self.data = self.get_ratings_from_file().append(user_df) #reload 7 mio ratings - best way to remove pseudo ratings
             self.fit_algorithm(num_recommendations)
-
-        #print("es wird die folgende Anzahl ratings an die 7 mio ratings angehangen")
-        #print(len(ratings_to_add))
-
-        #user_data = []
-        #for recipe, rating in ratings_to_add.items():
-        #    user_data.append([user.name, recipe, rating])
-        #user_df = pandas.DataFrame(user_data, columns=['user', 'item', 'label'])
-        #print(user_df)
-
-        #user_df = self.list_to_dataframe(ratings_to_add, user.name)
-        #if (len(user.ratings_to_add_to_df) < 10):
-        #    print("Using " + str(int(user_df.size / 6)) + " pseudo ratings for standard recommender")
-        #    user.ratings_to_add_to_df.clear()  # reset not-yet-added ratings
-        #self.data = self.data.append(user_df.sample(int(user_df.size / 6)))
-        #self.fit_algorithm(num_recommendations)
 
     def recommend_items(self, user, num_of_recommendations):
         if not user.has_chosen_categories() and len(user.ratings_to_add_to_df) == 0:

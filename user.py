@@ -1,4 +1,5 @@
 class User:
+    # user model - stores any relevant information about him
     def __init__(self, name, budget, level):
         self.name = name
         self.level = level
@@ -11,7 +12,6 @@ class User:
         self.ratings_to_add_to_df = {}
 
     def get_category_indices(self):
-        indices = []
         recipe_types = ["desserts_overlap", "main_dish_overlap", "side_dish_overlap",
                         "meat_and_poultry_overlap", "soups_stews_and_chili_overlap", "cakes_overlap",
                         "breakfast_and_brunch_overlap", "salad_overlap", "pasta_and_noodels_overlap",
@@ -20,9 +20,7 @@ class User:
                         "asian_style_overlap", "pizza_overlap", "deep_fried_overlap", "italy_and_italian_style_overlap",
                         "candy_overlap", "seafood_overlap", "cookies_overlap", "everyday_cooking_overlap",
                         "dips_and_spreads_overlap", "drinks_overlap", "spirits_overlap"]
-        for category in self.category_list:
-            indices.append(recipe_types.index(category))
-        return indices
+        return [recipe_types.index(category) for category in self.category_list]
 
     def get_dislikes(self):
         return [self.has_lactose_intolerance, self.has_gluten_intolerance, self.unwanted_ingredients]

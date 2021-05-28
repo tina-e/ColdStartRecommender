@@ -1,12 +1,8 @@
 import sys
-import concurrent.futures
-from threading import Thread
 
-from PyQt5 import uic, QtSvg, QtGui
-from PyQt5.QtCore import QRect, Qt, QStringListModel, QItemSelectionModel, QThread, QCoreApplication
-from PyQt5.Qt import QButtonGroup
+from PyQt5 import uic, QtGui
+from PyQt5.QtCore import Qt, QCoreApplication
 from PyQt5.QtWidgets import *
-import PyQt5
 
 from standard_recommender import UserCfRecommender
 from user import User
@@ -103,6 +99,7 @@ class RecommenderInterface(QMainWindow):
         return True
 
     def calc_recommendations(self):
+        print("User has selected the following categories: " + str(self.new_user.category_list))
         if len(self.new_user.pseudo_ratings) == 0:
             self.new_user.pseudo_ratings = recipe.get_pseudo_ratings(self.new_user)
         self.system.add_user(self.new_user, self.num_recommendations)
